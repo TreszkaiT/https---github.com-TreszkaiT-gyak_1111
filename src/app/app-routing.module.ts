@@ -13,6 +13,13 @@ const routes: Routes = [
       import('./page/home/home-page.module').then(
         (module) => module.HomePageModule
       ),
+  },
+  {
+    path: 'config',
+    loadChildren: () => 
+      import('./page/config/config-page.module').then(
+        (module) => module.ConfigPageModule
+      ),
   }
 ];
 

@@ -1,6 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Observable, tap } from 'rxjs';
 
-import {MenuItem} from 'primeng/api';
+
+import { DOCUMENT } from '@angular/common';
+import { Component, Inject, OnInit } from '@angular/core';
+
+import { ConfigEntity, ConfigStoreService } from './api/config';
+
+import { MenuItem, PrimeNGConfig } from 'primeng/api';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +19,19 @@ export class AppComponent implements OnInit{
 
   items!: MenuItem[];
 
+  public configChange$!: Observable<ConfigEntity>;
+
+  constructor(
+    private primengConfig: PrimeNGConfig,
+    private configStoreService: ConfigStoreService,
+    @Inject(DOCUMENT) private document: Document
+  ) {}
+
   ngOnInit(): void {
+
+    this.primengConfig.ripple = true;
+    this.configChange$ = this.configStoreService.selectEntity$();
+
     this.items = [
       {
         label: 'Home',
@@ -144,10 +162,25 @@ export class AppComponent implements OnInit{
       {
           label:'Quit',
           icon:'pi pi-fw pi-power-off'
+      },
+      {
+        icon: 'pi pi-fw pi-cog',
+        routerLink: 'config'
       }
     ];
+
+    this.configStoreService.selectEntity$().pipe(tap(config => {
+      this.switchTheme(config.theme);
+    })).subscribe();
   }
 
+  private switchTheme(theme: string) {
+    let themeLink = this.document.getElementById(
+        'app-theme'
+    ) as HTMLLinkElement;
 
-
+    if (themeLink) {
+        themeLink.href = theme + '.css';
+    }
+  }
 }
